@@ -1,21 +1,21 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowUpRight,
   CalendarDays,
+  CheckCircle2,
   ChevronRight,
+  ClipboardList,
   Command,
-  Crown,
   Filter,
-  Flame,
   GraduationCap,
+  LayoutDashboard,
   LineChart,
   MailCheck,
-  MessageSquareText,
   Moon,
   Plus,
   Search,
   Sparkles,
-  Star,
   Sun,
   Target,
   TrendingUp,
@@ -23,16 +23,9 @@ import {
   Wand2,
   X,
 } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const initialStudents = [
+const students = [
   {
     name: "김나영",
     school: "곡정고",
@@ -42,7 +35,6 @@ const initialStudents = [
     mood: "자신감 상승",
     risk: "낮음",
     note: "최근 서술형 정확도 상승. 다음 시험 전까지 문장 전환 훈련 추천.",
-    color: "from-pink-400 to-rose-500",
   },
   {
     name: "홍지유",
@@ -53,7 +45,6 @@ const initialStudents = [
     mood: "집중력 좋음",
     risk: "중간",
     note: "어휘는 빠르게 흡수하지만 문장 구조 분석에서 속도 편차가 있음.",
-    color: "from-sky-400 to-indigo-500",
   },
   {
     name: "장희선",
@@ -64,7 +55,6 @@ const initialStudents = [
     mood: "꾸준함",
     risk: "낮음",
     note: "필기와 복습 루틴이 안정적. 고난도 빈칸 추론을 조금 더 밀어도 됨.",
-    color: "from-violet-400 to-fuchsia-500",
   },
   {
     name: "박찬영",
@@ -75,7 +65,6 @@ const initialStudents = [
     mood: "느긋함",
     risk: "높음",
     note: "실력보다 제출 루틴이 문제. 주간 미션을 작게 쪼개면 회복 가능.",
-    color: "from-amber-400 to-orange-500",
   },
   {
     name: "고경민",
@@ -86,7 +75,6 @@ const initialStudents = [
     mood: "표현력 좋음",
     risk: "낮음",
     note: "글의 흐름을 잡는 능력이 좋음. 연결어 고급화 훈련 추천.",
-    color: "from-emerald-400 to-teal-500",
   },
 ];
 
@@ -128,69 +116,113 @@ function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-function StatCard({ icon: Icon, label, value, sub, accent }) {
+function Shell({ dark, children }) {
   return (
-    <motion.div
-      whileHover={{ y: -4, scale: 1.01 }}
-      className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.08] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl"
+    <div
+      className={cn(
+        "min-h-screen transition-colors duration-300",
+        dark ? "bg-[#0c111b] text-white" : "bg-[#f6f3ee] text-slate-900"
+      )}
     >
-      <div className={cn("absolute -right-8 -top-8 h-28 w-28 rounded-full blur-2xl", accent)} />
-      <div className="relative flex items-start justify-between">
-        <div>
-          <p className="text-sm text-slate-300">{label}</p>
-          <p className="mt-2 text-3xl font-black tracking-tight text-white">{value}</p>
-          <p className="mt-1 text-xs text-slate-400">{sub}</p>
-        </div>
-        <div className="rounded-2xl bg-white/10 p-3 text-white ring-1 ring-white/10">
-          <Icon size={22} />
-        </div>
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className={cn("absolute inset-0", dark ? "bg-[radial-gradient(circle_at_top,rgba(248,250,252,0.07),transparent_30%)]" : "bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.7),transparent_32%)]")} />
+        <div className={cn("absolute inset-0 opacity-[0.04]", dark ? "bg-[linear-gradient(rgba(255,255,255,1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,1)_1px,transparent_1px)]" : "bg-[linear-gradient(rgba(15,23,42,1)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,1)_1px,transparent_1px)]", "bg-[size:36px_36px]")} />
+        <div className={cn("absolute left-[8%] top-[4%] h-72 w-72 rounded-full blur-3xl", dark ? "bg-[#c8d6ff]/10" : "bg-white/80")} />
+        <div className={cn("absolute right-[8%] top-[10%] h-72 w-72 rounded-full blur-3xl", dark ? "bg-[#d5c3ff]/10" : "bg-[#efe6da]/70")} />
       </div>
-    </motion.div>
+      <main className="relative mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+    </div>
   );
 }
 
-function StudentCard({ student, selected, onClick }) {
-  const riskStyle = {
-    낮음: "bg-emerald-400/15 text-emerald-200 ring-emerald-300/20",
-    중간: "bg-amber-400/15 text-amber-200 ring-amber-300/20",
-    높음: "bg-rose-400/15 text-rose-200 ring-rose-300/20",
+function Panel({ dark, className = "", children }) {
+  return (
+    <div
+      className={cn(
+        "rounded-4xl border backdrop-blur-xl shadow-panel",
+        dark
+          ? "border-white/8 bg-white/[0.04]"
+          : "border-slate-900/8 bg-white/70",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SectionTitle({ icon: Icon, title, subtitle, dark }) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <p className={cn("flex items-center gap-2 text-sm font-semibold", dark ? "text-white" : "text-slate-900")}>
+          <Icon size={16} className={dark ? "text-slate-300" : "text-slate-500"} />
+          {title}
+        </p>
+        {subtitle && <p className={cn("mt-1 text-xs", dark ? "text-slate-400" : "text-slate-500")}>{subtitle}</p>}
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ dark, icon: Icon, label, value, sub }) {
+  return (
+    <Panel dark={dark} className="p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className={cn("text-xs uppercase tracking-[0.18em]", dark ? "text-slate-400" : "text-slate-500")}>{label}</p>
+          <p className={cn("mt-3 text-3xl font-semibold tracking-tight", dark ? "text-white" : "text-slate-900")}>{value}</p>
+          <p className={cn("mt-2 text-xs", dark ? "text-slate-400" : "text-slate-500")}>{sub}</p>
+        </div>
+        <div className={cn("grid h-11 w-11 place-items-center rounded-2xl border", dark ? "border-white/10 bg-white/5 text-slate-100" : "border-slate-200 bg-slate-50 text-slate-700")}>
+          <Icon size={18} />
+        </div>
+      </div>
+      <div className={cn("mt-4 h-px w-full", dark ? "bg-white/8" : "bg-slate-200")} />
+    </Panel>
+  );
+}
+
+function StudentCard({ dark, student, selected, onClick }) {
+  const riskTone = {
+    낮음: dark ? "bg-white/6 text-slate-200 border-white/10" : "bg-slate-100 text-slate-700 border-slate-200",
+    중간: dark ? "bg-amber-400/10 text-amber-100 border-amber-200/10" : "bg-amber-50 text-amber-700 border-amber-200",
+    높음: dark ? "bg-rose-400/10 text-rose-100 border-rose-200/10" : "bg-rose-50 text-rose-700 border-rose-200",
   };
 
   return (
     <motion.button
       layout
+      whileHover={{ y: -2 }}
       onClick={onClick}
-      whileHover={{ x: 4 }}
       className={cn(
-        "group w-full rounded-3xl border p-4 text-left transition",
+        "w-full rounded-3xl border p-4 text-left transition-all",
         selected
-          ? "border-white/35 bg-white/[0.14] shadow-xl shadow-indigo-950/30"
-          : "border-white/10 bg-white/[0.06] hover:border-white/25 hover:bg-white/[0.1]"
+          ? dark
+            ? "border-white/18 bg-white/[0.08]"
+            : "border-slate-300 bg-white"
+          : dark
+          ? "border-white/6 bg-white/[0.025] hover:bg-white/[0.05]"
+          : "border-slate-200/90 bg-white/60 hover:bg-white"
       )}
     >
       <div className="flex items-center gap-3">
-        <div className={cn("grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br text-lg font-black text-white shadow-lg", student.color)}>
+        <div className={cn("grid h-11 w-11 place-items-center rounded-2xl text-sm font-semibold", dark ? "bg-white/7 text-white" : "bg-slate-100 text-slate-700")}>
           {student.name.slice(0, 1)}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="truncate font-bold text-white">{student.name}</p>
-            <span className={cn("rounded-full px-2 py-0.5 text-[11px] ring-1", riskStyle[student.risk])}>{student.risk}</span>
+            <p className={cn("truncate text-sm font-semibold", dark ? "text-white" : "text-slate-900")}>{student.name}</p>
+            <span className={cn("rounded-full border px-2 py-0.5 text-[11px]", riskTone[student.risk])}>{student.risk}</span>
           </div>
-          <p className="mt-0.5 text-xs text-slate-400">
-            {student.school} · {student.grade} · {student.tag}
-          </p>
+          <p className={cn("mt-1 text-xs", dark ? "text-slate-400" : "text-slate-500")}>{student.school} · {student.grade} · {student.tag}</p>
         </div>
-        <ChevronRight className="text-slate-500 transition group-hover:text-white" size={18} />
+        <ChevronRight size={16} className={dark ? "text-slate-500" : "text-slate-400"} />
       </div>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${student.score}%` }}
-          className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-indigo-300 to-fuchsia-300"
-        />
+      <div className={cn("mt-4 h-1.5 overflow-hidden rounded-full", dark ? "bg-white/8" : "bg-slate-200") }>
+        <div className={cn("h-full rounded-full", dark ? "bg-white/70" : "bg-slate-700")} style={{ width: `${student.score}%` }} />
       </div>
-      <div className="mt-2 flex justify-between text-xs text-slate-400">
+      <div className={cn("mt-2 flex justify-between text-[11px]", dark ? "text-slate-400" : "text-slate-500") }>
         <span>학습 안정도</span>
         <span>{student.score}%</span>
       </div>
@@ -198,7 +230,7 @@ function StudentCard({ student, selected, onClick }) {
   );
 }
 
-function NoticeComposer() {
+function NoticeComposer({ dark }) {
   const [tone, setTone] = useState("warm");
   const [target, setTarget] = useState("중3 학부모님");
   const [topic, setTopic] = useState("다음 주부터 서술형 대비 집중 훈련을 시작합니다");
@@ -213,47 +245,38 @@ function NoticeComposer() {
     try {
       await navigator.clipboard.writeText(body);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1400);
+      setTimeout(() => setCopied(false), 1200);
     } catch {
       setCopied(true);
-      setTimeout(() => setCopied(false), 1400);
+      setTimeout(() => setCopied(false), 1200);
     }
   };
 
+  const inputBase = cn(
+    "w-full rounded-2xl border px-3 py-2.5 text-sm outline-none transition",
+    dark
+      ? "border-white/10 bg-white/[0.04] text-white placeholder:text-slate-500"
+      : "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400"
+  );
+
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-white/[0.07] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl">
+    <Panel dark={dark} className="p-5">
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="flex items-center gap-2 text-sm font-bold text-cyan-100">
-            <Wand2 size={17} /> AI 공지문 생성기
-          </p>
-          <p className="mt-1 text-xs text-slate-400">학부모 공지를 10초 안에 그럴듯하게 정리하는 미니 도구</p>
-        </div>
-        <button onClick={copyText} className="rounded-2xl bg-white/10 px-3 py-2 text-xs font-bold text-white ring-1 ring-white/10 transition hover:bg-white/20">
-          {copied ? "복사됨" : "복사"}
-        </button>
+        <SectionTitle dark={dark} icon={Wand2} title="AI 공지문 생성기" subtitle="미니멀한 구성으로 바로 복사해 쓸 수 있는 공지 작성기" />
+        <button onClick={copyText} className={cn("rounded-2xl border px-3 py-2 text-xs font-medium transition", dark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50")}>{copied ? "복사됨" : "복사"}</button>
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-3">
-        <label className="space-y-1 text-xs text-slate-400">
-          톤
-          <select value={tone} onChange={(e) => setTone(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-2 text-sm text-white outline-none">
-            {Object.entries(notices).map(([key, value]) => (
-              <option key={key} value={key}>{value.label}</option>
-            ))}
-          </select>
-        </label>
-        <label className="space-y-1 text-xs text-slate-400">
-          대상
-          <input value={target} onChange={(e) => setTarget(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-2 text-sm text-white outline-none" />
-        </label>
-        <label className="space-y-1 text-xs text-slate-400">
-          주제
-          <input value={topic} onChange={(e) => setTopic(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-2 text-sm text-white outline-none" />
-        </label>
+        <select value={tone} onChange={(e) => setTone(e.target.value)} className={inputBase}>
+          {Object.entries(notices).map(([key, value]) => (
+            <option key={key} value={key}>{value.label}</option>
+          ))}
+        </select>
+        <input value={target} onChange={(e) => setTarget(e.target.value)} className={inputBase} />
+        <input value={topic} onChange={(e) => setTopic(e.target.value)} className={inputBase} />
       </div>
 
-      <div className="mt-4 rounded-3xl border border-white/10 bg-slate-950/55 p-4 text-sm leading-7 text-slate-100 shadow-inner">
+      <div className={cn("mt-4 rounded-3xl border p-4 text-sm leading-7", dark ? "border-white/8 bg-black/20 text-slate-100" : "border-slate-200 bg-[#fbfaf8] text-slate-700")}>
         {body.split("\n").map((line, idx) => (
           <React.Fragment key={idx}>
             {line}
@@ -261,19 +284,21 @@ function NoticeComposer() {
           </React.Fragment>
         ))}
       </div>
-    </div>
+    </Panel>
   );
 }
 
-function ActionBoard() {
+function ActionBoard({ dark }) {
   const [tasks, setTasks] = useState(() => {
     try {
-      const stored = localStorage.getItem("pilup-command-tasks");
-      return stored ? JSON.parse(stored) : [
-        { id: 1, text: "고1 서술형 8문장 샘플 3개 만들기", done: false },
-        { id: 2, text: "중3 학부모 안내문 발송", done: true },
-        { id: 3, text: "위험도 높은 학생 1명 상담 메모 남기기", done: false },
-      ];
+      const stored = localStorage.getItem("pilup-command-tasks-v2");
+      return stored
+        ? JSON.parse(stored)
+        : [
+            { id: 1, text: "고1 서술형 8문장 샘플 3개 만들기", done: false },
+            { id: 2, text: "중3 학부모 안내문 발송", done: true },
+            { id: 3, text: "위험도 높은 학생 1명 상담 메모 남기기", done: false },
+          ];
     } catch {
       return [];
     }
@@ -281,7 +306,7 @@ function ActionBoard() {
   const [draft, setDraft] = useState("");
 
   useEffect(() => {
-    localStorage.setItem("pilup-command-tasks", JSON.stringify(tasks));
+    localStorage.setItem("pilup-command-tasks-v2", JSON.stringify(tasks));
   }, [tasks]);
 
   const addTask = () => {
@@ -292,17 +317,10 @@ function ActionBoard() {
   };
 
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-white/[0.07] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl">
+    <Panel dark={dark} className="p-5">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="flex items-center gap-2 text-sm font-bold text-fuchsia-100">
-            <Target size={17} /> 오늘의 액션 보드
-          </p>
-          <p className="mt-1 text-xs text-slate-400">완료 상태는 브라우저에 자동 저장됩니다.</p>
-        </div>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-300 ring-1 ring-white/10">
-          {tasks.filter((t) => t.done).length}/{tasks.length}
-        </span>
+        <SectionTitle dark={dark} icon={ClipboardList} title="오늘의 액션 보드" subtitle="완료 상태는 브라우저에 자동 저장됩니다" />
+        <span className={cn("rounded-full border px-3 py-1 text-xs", dark ? "border-white/10 text-slate-300" : "border-slate-200 text-slate-600")}>{tasks.filter((t) => t.done).length}/{tasks.length}</span>
       </div>
 
       <div className="mt-4 flex gap-2">
@@ -310,12 +328,10 @@ function ActionBoard() {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && addTask()}
-          placeholder="할 일을 입력하세요"
-          className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500"
+          placeholder="새 할 일을 입력하세요"
+          className={cn("min-w-0 flex-1 rounded-2xl border px-3 py-2.5 text-sm outline-none", dark ? "border-white/10 bg-white/[0.04] text-white placeholder:text-slate-500" : "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400")}
         />
-        <button onClick={addTask} className="rounded-2xl bg-white px-3 py-2 text-sm font-black text-slate-950 transition hover:bg-cyan-100">
-          <Plus size={18} />
-        </button>
+        <button onClick={addTask} className={cn("rounded-2xl border px-3 py-2 transition", dark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50") }><Plus size={18} /></button>
       </div>
 
       <div className="mt-4 space-y-2">
@@ -326,272 +342,217 @@ function ActionBoard() {
               layout
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -12 }}
-              className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-3"
+              exit={{ opacity: 0, x: -8 }}
+              className={cn("flex items-center gap-3 rounded-3xl border p-3", dark ? "border-white/8 bg-white/[0.03]" : "border-slate-200 bg-white/70")}
             >
               <button
                 onClick={() => setTasks((prev) => prev.map((t) => t.id === task.id ? { ...t, done: !t.done } : t))}
                 className={cn(
-                  "h-5 w-5 rounded-full ring-1 transition",
-                  task.done ? "bg-cyan-300 ring-cyan-200" : "bg-white/5 ring-white/20"
+                  "grid h-6 w-6 place-items-center rounded-full border transition",
+                  task.done
+                    ? dark
+                      ? "border-white/20 bg-white/10 text-white"
+                      : "border-slate-300 bg-slate-100 text-slate-700"
+                    : dark
+                    ? "border-white/12 bg-transparent text-transparent"
+                    : "border-slate-300 bg-transparent text-transparent"
                 )}
-              />
-              <p className={cn("min-w-0 flex-1 text-sm", task.done ? "text-slate-500 line-through" : "text-slate-100")}>{task.text}</p>
-              <button onClick={() => setTasks((prev) => prev.filter((t) => t.id !== task.id))} className="text-slate-500 hover:text-white">
-                <X size={16} />
+              >
+                <CheckCircle2 size={14} />
               </button>
+              <p className={cn("min-w-0 flex-1 text-sm", task.done ? "line-through opacity-50" : "", dark ? "text-slate-100" : "text-slate-700")}>{task.text}</p>
+              <button onClick={() => setTasks((prev) => prev.filter((t) => t.id !== task.id))} className={dark ? "text-slate-500 hover:text-white" : "text-slate-400 hover:text-slate-700"}><X size={16} /></button>
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
-    </div>
+    </Panel>
   );
 }
 
-function App() {
+export default function App() {
   const [dark, setDark] = useState(true);
   const [query, setQuery] = useState("");
   const [grade, setGrade] = useState("전체");
-  const [selected, setSelected] = useState(initialStudents[0]);
+  const [selected, setSelected] = useState(students[0]);
   const [newStudents, setNewStudents] = useState(6);
   const [tuition, setTuition] = useState(24);
 
-  const filtered = useMemo(() => {
-    return initialStudents.filter((s) => {
+  const filteredStudents = useMemo(() => {
+    return students.filter((s) => {
       const matchesQuery = `${s.name} ${s.school} ${s.grade} ${s.tag}`.toLowerCase().includes(query.toLowerCase());
       const matchesGrade = grade === "전체" || s.grade === grade;
       return matchesQuery && matchesGrade;
     });
   }, [query, grade]);
 
-  const forecast = newStudents * tuition;
-  const selectedInsight = useMemo(() => {
+  const focusInsight = useMemo(() => {
     if (!selected) return "학생을 선택하면 맞춤 액션이 나타납니다.";
-    if (selected.risk === "높음") return `${selected.name}은 실력보다 루틴 관리가 핵심입니다. 오늘은 숙제를 크게 늘리기보다, 15분짜리 미션 2개로 쪼개서 성공 경험을 만드는 쪽이 좋습니다.`;
-    if (selected.risk === "중간") return `${selected.name}은 지금 속도 편차를 줄이는 단계입니다. 문제 수를 늘리기보다, 같은 유형을 3회 반복해 안정도를 올리는 전략이 좋습니다.`;
-    return `${selected.name}은 현재 흐름이 좋습니다. 쉬운 문제 반복보다 한 단계 높은 변형 문제를 섞어 성취감을 유지시키는 쪽이 좋습니다.`;
+    if (selected.risk === "높음") return `${selected.name}은 실력보다 루틴 회복이 먼저입니다. 숙제량을 줄이고, 바로 성공할 수 있는 짧은 과제를 제시하는 방식이 효과적입니다.`;
+    if (selected.risk === "중간") return `${selected.name}은 현재 속도와 정확도를 함께 안정시키는 단계입니다. 비슷한 유형을 3회 반복하는 구조가 잘 맞습니다.`;
+    return `${selected.name}은 전반적인 흐름이 좋습니다. 쉬운 문제 반복보다 한 단계 높은 변형 문제를 섞어 성취감을 유지하는 편이 좋습니다.`;
   }, [selected]);
 
-  return (
-    <div className={cn(
-      "min-h-screen overflow-hidden transition-colors",
-      dark ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-950"
-    )}>
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-[-10%] top-[-10%] h-96 w-96 rounded-full bg-cyan-500/25 blur-3xl" />
-        <div className="absolute right-[-10%] top-[10%] h-[32rem] w-[32rem] rounded-full bg-fuchsia-500/20 blur-3xl" />
-        <div className="absolute bottom-[-12%] left-[35%] h-[28rem] w-[28rem] rounded-full bg-indigo-500/20 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_32%),linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:100%_100%,44px_44px,44px_44px]" />
-      </div>
+  const forecast = newStudents * tuition;
 
-      <main className="relative mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-white/[0.08] p-4 shadow-2xl shadow-black/20 backdrop-blur-xl md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <motion.div
-              initial={{ rotate: -10, scale: 0.9 }}
-              animate={{ rotate: 0, scale: 1 }}
-              className="grid h-12 w-12 place-items-center rounded-2xl bg-white text-slate-950 shadow-lg shadow-cyan-500/20"
-            >
-              <Command size={24} />
-            </motion.div>
+  const chartAxis = dark ? "#7c879a" : "#6b7280";
+  const tooltipStyle = {
+    background: dark ? "rgba(12,17,27,0.96)" : "rgba(255,255,255,0.98)",
+    border: dark ? "1px solid rgba(255,255,255,.08)" : "1px solid rgba(15,23,42,.08)",
+    borderRadius: 18,
+    color: dark ? "white" : "#111827",
+  };
+
+  return (
+    <Shell dark={dark}>
+      <Panel dark={dark} className="p-5 md:p-6">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <div className={cn("grid h-14 w-14 place-items-center rounded-3xl border", dark ? "border-white/10 bg-white/5 text-white" : "border-slate-200 bg-white text-slate-800") }>
+              <Command size={23} />
+            </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.35em] text-cyan-200/80">Pilup AI Command Deck</p>
-              <h1 className="text-xl font-black tracking-tight text-white md:text-2xl">필업 운영실 · 오늘의 모든 판단을 한 화면에</h1>
+              <div className={cn("inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.22em]", dark ? "border-white/10 text-slate-300" : "border-slate-200 text-slate-500") }>
+                <LayoutDashboard size={13} /> Pilup AI Command Deck
+              </div>
+              <h1 className={cn("mt-3 text-2xl font-semibold tracking-tight md:text-4xl", dark ? "text-white" : "text-slate-900")}>필업 운영실 · 더 조용하고 더 정교하게</h1>
+              <p className={cn("mt-2 max-w-3xl text-sm leading-7", dark ? "text-slate-400" : "text-slate-600")}>네온 느낌을 줄이고, 여백과 타이포 중심으로 정리한 미니멀 버전입니다. 기능은 유지하면서 시각적 피로감을 낮췄어요.</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button className="rounded-2xl bg-cyan-300 px-4 py-2 text-sm font-black text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-200">
-              <Sparkles className="mr-2 inline" size={16} /> AI 추천 실행
-            </button>
-            <button onClick={() => setDark((v) => !v)} className="rounded-2xl bg-white/10 px-3 py-2 text-sm font-bold text-white ring-1 ring-white/10 transition hover:bg-white/20">
-              {dark ? <Sun size={17} /> : <Moon size={17} />}
-            </button>
+            <button className={cn("rounded-2xl border px-4 py-2.5 text-sm font-medium transition", dark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50")}><Sparkles className="mr-2 inline" size={15} />AI 추천 실행</button>
+            <button onClick={() => setDark((v) => !v)} className={cn("rounded-2xl border px-3 py-2.5 transition", dark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50")}>{dark ? <Sun size={17} /> : <Moon size={17} />}</button>
           </div>
-        </header>
+        </div>
+      </Panel>
 
-        <section className="mt-5 grid gap-4 md:grid-cols-4">
-          <StatCard icon={Users} label="오늘 관리 학생" value="27명" sub="위험도 높은 학생 3명" accent="bg-cyan-400/25" />
-          <StatCard icon={MailCheck} label="공지 대기" value="4건" sub="학부모 안내 2건 포함" accent="bg-fuchsia-400/25" />
-          <StatCard icon={TrendingUp} label="이번 달 예상" value="840만" sub="전월 대비 +6.3%" accent="bg-emerald-400/25" />
-          <StatCard icon={Flame} label="오늘 핵심 액션" value="8개" sub="완료율 62%" accent="bg-amber-400/25" />
-        </section>
+      <section className="mt-5 grid gap-4 md:grid-cols-4">
+        <StatCard dark={dark} icon={Users} label="Students" value="27명" sub="위험도 높은 학생 3명" />
+        <StatCard dark={dark} icon={MailCheck} label="Notices" value="4건" sub="학부모 안내 2건 포함" />
+        <StatCard dark={dark} icon={TrendingUp} label="Revenue" value="840만" sub="전월 대비 +6.3%" />
+        <StatCard dark={dark} icon={Target} label="Actions" value="8개" sub="오늘 핵심 액션" />
+      </section>
 
-        <section className="mt-5 grid gap-5 lg:grid-cols-[1.05fr_1.4fr_0.95fr]">
-          <div className="space-y-5">
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.07] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="flex items-center gap-2 text-sm font-bold text-cyan-100">
-                    <GraduationCap size={17} /> 학생 레이더
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">검색, 학년 필터, 위험도 확인</p>
-                </div>
-                <Filter size={18} className="text-slate-400" />
+      <section className="mt-5 grid gap-5 lg:grid-cols-[1.02fr_1.38fr_0.95fr]">
+        <div className="space-y-5">
+          <Panel dark={dark} className="p-5">
+            <SectionTitle dark={dark} icon={GraduationCap} title="학생 레이더" subtitle="검색, 학년 필터, 위험도 확인" />
+            <div className="mt-4 flex gap-2">
+              <div className="relative min-w-0 flex-1">
+                <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2", dark ? "text-slate-500" : "text-slate-400")} size={16} />
+                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="학생 검색" className={cn("w-full rounded-2xl border py-2.5 pl-9 pr-3 text-sm outline-none", dark ? "border-white/10 bg-white/[0.04] text-white placeholder:text-slate-500" : "border-slate-200 bg-white text-slate-800 placeholder:text-slate-400")} />
               </div>
-
-              <div className="mt-4 flex gap-2">
-                <div className="relative min-w-0 flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="학생 검색"
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/65 py-2 pl-9 pr-3 text-sm text-white outline-none placeholder:text-slate-500"
-                  />
-                </div>
-                <select value={grade} onChange={(e) => setGrade(e.target.value)} className="rounded-2xl border border-white/10 bg-slate-950/65 px-3 py-2 text-sm text-white outline-none">
-                  {['전체', '중3', '고1', '고2'].map((g) => <option key={g}>{g}</option>)}
-                </select>
-              </div>
-
-              <div className="mt-4 space-y-3">
-                {filtered.map((student) => (
-                  <StudentCard key={student.name} student={student} selected={selected?.name === student.name} onClick={() => setSelected(student)} />
-                ))}
-              </div>
+              <select value={grade} onChange={(e) => setGrade(e.target.value)} className={cn("rounded-2xl border px-3 py-2.5 text-sm outline-none", dark ? "border-white/10 bg-white/[0.04] text-white" : "border-slate-200 bg-white text-slate-800") }>
+                {["전체", "중3", "고1", "고2"].map((g) => <option key={g}>{g}</option>)}
+              </select>
             </div>
+            <div className="mt-4 space-y-3">
+              {filteredStudents.map((student) => (
+                <StudentCard key={student.name} dark={dark} student={student} selected={selected?.name === student.name} onClick={() => setSelected(student)} />
+              ))}
+            </div>
+          </Panel>
 
-            <ActionBoard />
-          </div>
+          <ActionBoard dark={dark} />
+        </div>
 
-          <div className="space-y-5">
-            <div className="overflow-hidden rounded-[2.3rem] border border-white/10 bg-white/[0.08] shadow-2xl shadow-black/25 backdrop-blur-xl">
-              <div className="relative p-6">
-                <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-cyan-300/20 blur-3xl" />
-                <div className="relative flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-100 ring-1 ring-white/10">
-                      <Crown size={14} /> AI 판단 브리핑
-                    </div>
-                    <h2 className="mt-4 text-3xl font-black tracking-tight text-white md:text-4xl">
-                      오늘 주원쌤이 먼저 챙겨야 할 학생은<br className="hidden md:block" />
-                      <span className="bg-gradient-to-r from-cyan-200 via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">“위험도 높은데 회복 가능한 학생”</span>입니다.
-                    </h2>
-                    <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
-                      이 화면은 단순 대시보드가 아니라, 학생 상태 · 수업 일정 · 학부모 공지 · 매출 시뮬레이션을 한 번에 묶어 “오늘 뭐부터 해야 하는지”를 보여주는 작은 운영실입니다.
-                    </p>
-                  </div>
-                  <div className="rounded-3xl border border-white/10 bg-slate-950/45 p-4 text-right">
-                    <p className="text-xs text-slate-400">AI 추천 우선순위</p>
-                    <p className="mt-1 text-2xl font-black text-white">찬영 → 지유 → 공지</p>
-                    <p className="mt-1 text-xs text-slate-500">루틴 관리 / 속도 안정 / 안내문 발송</p>
-                  </div>
-                </div>
+        <div className="space-y-5">
+          <Panel dark={dark} className="overflow-hidden">
+            <div className="p-6 md:p-7">
+              <div className={cn("inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs", dark ? "border-white/10 text-slate-300" : "border-slate-200 text-slate-600") }>
+                <Sparkles size={14} /> AI Focus Brief
               </div>
+              <h2 className={cn("mt-5 max-w-3xl text-3xl font-semibold tracking-tight md:text-[2.65rem] md:leading-[1.15]", dark ? "text-white" : "text-slate-900")}>오늘 가장 먼저 챙길 것은 <span className={dark ? "text-slate-300" : "text-slate-700"}>학생의 루틴과 우선순위</span>입니다.</h2>
+              <p className={cn("mt-4 max-w-2xl text-sm leading-7", dark ? "text-slate-400" : "text-slate-600")}>이 화면은 단순히 예쁜 대시보드가 아니라, 학생 상태 · 수업 일정 · 공지문 · 매출 시뮬레이션을 한 흐름으로 묶어서 “오늘 뭐부터 해야 하는지”를 보여주는 운영 도구입니다.</p>
 
-              <div className="grid border-t border-white/10 md:grid-cols-[1fr_0.9fr]">
-                <div className="p-5">
-                  <div className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-5">
-                    <div className="flex items-center gap-3">
-                      <div className={cn("grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br text-xl font-black text-white", selected.color)}>
-                        {selected.name.slice(0, 1)}
-                      </div>
-                      <div>
-                        <p className="text-lg font-black text-white">{selected.name}</p>
-                        <p className="text-xs text-slate-400">{selected.school} · {selected.grade} · {selected.mood}</p>
-                      </div>
+              <div className="mt-8 grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
+                <div className={cn("rounded-4xl border p-5", dark ? "border-white/8 bg-white/[0.03]" : "border-slate-200 bg-white/70") }>
+                  <div className="flex items-center gap-3">
+                    <div className={cn("grid h-12 w-12 place-items-center rounded-2xl text-sm font-semibold", dark ? "bg-white/8 text-white" : "bg-slate-100 text-slate-700")}>{selected.name.slice(0, 1)}</div>
+                    <div>
+                      <p className={cn("text-lg font-semibold", dark ? "text-white" : "text-slate-900")}>{selected.name}</p>
+                      <p className={cn("text-xs", dark ? "text-slate-400" : "text-slate-500")}>{selected.school} · {selected.grade} · {selected.mood}</p>
                     </div>
-                    <p className="mt-4 text-sm leading-7 text-slate-300">{selected.note}</p>
-                    <div className="mt-4 rounded-3xl bg-white/[0.06] p-4 ring-1 ring-white/10">
-                      <p className="flex items-center gap-2 text-xs font-bold text-cyan-100">
-                        <Sparkles size={15} /> 아인이 추천 액션
-                      </p>
-                      <p className="mt-2 text-sm leading-7 text-slate-200">{selectedInsight}</p>
-                    </div>
+                  </div>
+                  <p className={cn("mt-4 text-sm leading-7", dark ? "text-slate-300" : "text-slate-700")}>{selected.note}</p>
+                  <div className={cn("mt-4 rounded-3xl border p-4", dark ? "border-white/8 bg-black/15" : "border-slate-200 bg-[#fbfaf8]")}>
+                    <p className={cn("text-xs font-medium uppercase tracking-[0.16em]", dark ? "text-slate-400" : "text-slate-500")}>Aini Recommendation</p>
+                    <p className={cn("mt-2 text-sm leading-7", dark ? "text-slate-100" : "text-slate-700")}>{focusInsight}</p>
                   </div>
                 </div>
 
-                <div className="border-t border-white/10 p-5 md:border-l md:border-t-0">
-                  <p className="flex items-center gap-2 text-sm font-bold text-indigo-100">
-                    <CalendarDays size={17} /> 오늘 수업 타임라인
-                  </p>
+                <div className={cn("rounded-4xl border p-5", dark ? "border-white/8 bg-white/[0.03]" : "border-slate-200 bg-white/70") }>
+                  <SectionTitle dark={dark} icon={CalendarDays} title="오늘 수업 타임라인" subtitle="시간별 준비 상태" />
                   <div className="mt-4 space-y-3">
-                    {schedule.map((item, idx) => (
-                      <motion.div
-                        key={item.time}
-                        initial={{ opacity: 0, x: 12 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.07 }}
-                        className="rounded-3xl border border-white/10 bg-white/[0.06] p-4"
-                      >
+                    {schedule.map((item) => (
+                      <div key={item.time} className={cn("rounded-3xl border p-4", dark ? "border-white/8 bg-white/[0.03]" : "border-slate-200 bg-white") }>
                         <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-black text-white">{item.time}</p>
-                          <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] text-slate-300 ring-1 ring-white/10">{item.state}</span>
+                          <p className={cn("text-sm font-semibold", dark ? "text-white" : "text-slate-900")}>{item.time}</p>
+                          <span className={cn("rounded-full border px-2 py-1 text-[11px]", dark ? "border-white/10 text-slate-300" : "border-slate-200 text-slate-500")}>{item.state}</span>
                         </div>
-                        <p className="mt-2 text-sm text-slate-200">{item.title}</p>
-                        <p className="mt-1 text-xs text-slate-500">{item.room}</p>
-                      </motion.div>
+                        <p className={cn("mt-2 text-sm", dark ? "text-slate-200" : "text-slate-700")}>{item.title}</p>
+                        <p className={cn("mt-1 text-xs", dark ? "text-slate-500" : "text-slate-400")}>{item.room}</p>
+                      </div>
                     ))}
                   </div>
                 </div>
               </div>
             </div>
+          </Panel>
 
-            <NoticeComposer />
-          </div>
+          <NoticeComposer dark={dark} />
+        </div>
 
-          <div className="space-y-5">
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.07] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="flex items-center gap-2 text-sm font-bold text-emerald-100">
-                    <LineChart size={17} /> 성장 시뮬레이터
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">신규 등록에 따른 월 매출 변화</p>
-                </div>
-                <Star size={18} className="text-amber-200" />
-              </div>
-
-              <div className="mt-5 h-44">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={revenueData} margin={{ left: -25, right: 8, top: 8, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="revenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#67e8f9" stopOpacity={0.55}/>
-                        <stop offset="95%" stopColor="#a78bfa" stopOpacity={0.02}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="month" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ background: "rgba(15, 23, 42, .9)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 18, color: "white" }} />
-                    <Area type="monotone" dataKey="value" stroke="#67e8f9" strokeWidth={3} fill="url(#revenue)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="mt-4 space-y-4 rounded-3xl bg-slate-950/45 p-4 ring-1 ring-white/10">
-                <label className="block text-xs text-slate-400">
-                  신규 학생 수: <b className="text-white">{newStudents}명</b>
-                  <input type="range" min="0" max="20" value={newStudents} onChange={(e) => setNewStudents(Number(e.target.value))} className="mt-2 w-full" />
-                </label>
-                <label className="block text-xs text-slate-400">
-                  평균 수강료: <b className="text-white">{tuition}만원</b>
-                  <input type="range" min="18" max="32" value={tuition} onChange={(e) => setTuition(Number(e.target.value))} className="mt-2 w-full" />
-                </label>
-                <div className="rounded-2xl bg-white/[0.07] p-4">
-                  <p className="text-xs text-slate-400">예상 추가 월매출</p>
-                  <p className="mt-1 text-3xl font-black text-white">+{forecast}만원</p>
-                  <p className="mt-1 text-xs text-slate-500">실제 앱에서는 고정비·퇴원율·형제 할인까지 연결 가능</p>
-                </div>
-              </div>
+        <div className="space-y-5">
+          <Panel dark={dark} className="p-5">
+            <SectionTitle dark={dark} icon={LineChart} title="성장 시뮬레이터" subtitle="신규 등록에 따른 예상 추가 월매출" />
+            <div className="mt-5 h-44">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueData} margin={{ left: -24, right: 8, top: 4, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="cleanRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={dark ? "#f8fafc" : "#111827"} stopOpacity={0.25} />
+                      <stop offset="95%" stopColor={dark ? "#f8fafc" : "#111827"} stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="month" tick={{ fill: chartAxis, fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: chartAxis, fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Area type="monotone" dataKey="value" stroke={dark ? "#f8fafc" : "#111827"} strokeWidth={2.3} fill="url(#cleanRevenue)" />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-cyan-400/15 via-indigo-500/10 to-fuchsia-500/15 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl">
-              <p className="flex items-center gap-2 text-sm font-bold text-white">
-                <MessageSquareText size={17} /> 다음 확장 아이디어
-              </p>
-              <div className="mt-4 space-y-3 text-sm text-slate-300">
-                <div className="rounded-2xl bg-white/[0.07] p-3 ring-1 ring-white/10">사진/PDF 업로드 → 시험지 자동 분석</div>
-                <div className="rounded-2xl bg-white/[0.07] p-3 ring-1 ring-white/10">학생별 오답 유형 누적 → 상담 리포트 생성</div>
-                <div className="rounded-2xl bg-white/[0.07] p-3 ring-1 ring-white/10">학부모 공지 → 카톡/문자용으로 자동 변환</div>
-                <div className="rounded-2xl bg-white/[0.07] p-3 ring-1 ring-white/10">Firebase 연결 → 실제 다중 사용자 운영</div>
+            <div className={cn("mt-4 rounded-4xl border p-4", dark ? "border-white/8 bg-white/[0.03]" : "border-slate-200 bg-white/70") }>
+              <label className={cn("block text-xs", dark ? "text-slate-400" : "text-slate-500")}>신규 학생 수: <b className={dark ? "text-white" : "text-slate-800"}>{newStudents}명</b>
+                <input type="range" min="0" max="20" value={newStudents} onChange={(e) => setNewStudents(Number(e.target.value))} className="mt-2 w-full" />
+              </label>
+              <label className={cn("mt-4 block text-xs", dark ? "text-slate-400" : "text-slate-500")}>평균 수강료: <b className={dark ? "text-white" : "text-slate-800"}>{tuition}만원</b>
+                <input type="range" min="18" max="32" value={tuition} onChange={(e) => setTuition(Number(e.target.value))} className="mt-2 w-full" />
+              </label>
+              <div className={cn("mt-4 rounded-3xl border p-4", dark ? "border-white/8 bg-black/15" : "border-slate-200 bg-[#fbfaf8]")}>
+                <p className={cn("text-xs uppercase tracking-[0.18em]", dark ? "text-slate-400" : "text-slate-500")}>Projected Gain</p>
+                <p className={cn("mt-2 text-3xl font-semibold", dark ? "text-white" : "text-slate-900")}>+{forecast}만원</p>
+                <p className={cn("mt-2 text-xs leading-6", dark ? "text-slate-500" : "text-slate-500")}>고정비, 퇴원율, 형제 할인까지 연결하면 실제 운영용 시뮬레이터로 확장 가능합니다.</p>
               </div>
             </div>
-          </div>
-        </section>
-      </main>
-    </div>
+          </Panel>
+
+          <Panel dark={dark} className="p-5">
+            <SectionTitle dark={dark} icon={ArrowUpRight} title="다음 확장 아이디어" subtitle="현재 프로토타입을 실제 운영툴로 키우는 방향" />
+            <div className="mt-4 space-y-3">
+              {[
+                "학생 추가 / 수정 / 삭제 기능",
+                "상담 메모 저장 기능",
+                "시험지 업로드 → 자동 분석",
+                "Firebase 연결 → 여러 기기 동기화",
+              ].map((item) => (
+                <div key={item} className={cn("rounded-3xl border p-4 text-sm", dark ? "border-white/8 bg-white/[0.03] text-slate-200" : "border-slate-200 bg-white/70 text-slate-700")}>{item}</div>
+              ))}
+            </div>
+          </Panel>
+        </div>
+      </section>
+    </Shell>
   );
 }
-
-export default App;
